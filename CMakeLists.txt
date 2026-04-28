@@ -12,3 +12,5 @@ add_executable(wave_ppm wave_ppm.cpp frame_utils.cpp)
 add_executable(sphere sphere.cpp frame_utils.cpp)
 
 add_executable(rand_animation rand_animation.cpp frame_utils.cpp)
+
+add_executable(sphere_animate sphere_animate.cpp frame_utils.cpp)

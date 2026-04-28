@@ -45,6 +45,10 @@ bool frames_to_gif(const char *filename, const std::vector<Frame> &frames, int d
         return false;
     }
 
+    msf_gif_bgra_flag = 0;
+
+    msf_gif_bgra_flag = 1;
+
     std::vector<uint8_t> pixels;
     for (const auto &frame : frames)
     {
@@ -57,19 +61,21 @@ bool frames_to_gif(const char *filename, const std::vector<Frame> &frames, int d
         {
             for (int i = 0; i < width; i++)
             {
-                pixels.push_back(frame.at(i, j).r);
-                pixels.push_back(frame.at(i, j).g);
-                pixels.push_back(frame.at(i, j).b);
+                pixels.push_back(frame.b(i, j));
+                pixels.push_back(frame.g(i, j));
+                pixels.push_back(frame.r(i, j));
                 pixels.push_back(255); // Alpha
             }
         }
         if (!msf_gif_frame(&gifState, pixels.data(), delay_cs, 16, width * 4))
         {
             msf_gif_end(&gifState); // clean up
+            msf_gif_bgra_flag = 0;
             return false;
         }
     }
 
+    msf_gif_bgra_flag = 0;
     MsfGifResult result = msf_gif_end(&gifState);
     bool success = false;
     if (result.data)
