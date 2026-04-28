@@ -22,18 +22,24 @@ int main()
                 float radius = 0.2f + 0.1f * sin(time * 2 * 3.14159f);
                 if (x * x + y * y < radius * radius)
                 {
-                    frame.at(i, j) = Color(255, 0, 0);
+                    frame.at(i, j) = Color(255, 255, 0);
                 }
                 else
                 {
-                    frame.at(i, j) = Color(255, 255, 255);
+                    frame.at(i, j) = Color(2, 2, 255);
                 }
             }
         }
         frames.push_back(frame);
     }
 
-    frames_to_gif("animation.gif", frames, 1);
+    if (!frames.empty())
+    {
+        frames.front().dump("rand_animation_debug_first.ppm");
+        frames[num_frames / 2].dump("rand_animation_debug_mid.ppm");
+    }
+
+    frames_to_gif("animation.gif", frames, 10);
 
     return 0;
 }

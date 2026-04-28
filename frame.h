@@ -22,7 +22,7 @@ const inline unsigned char clamp(const T &x)
 class Frame
 {
 public:
-    Frame(const int w, const int h, const int mc = 255) : _width(w), _height(h), _max_color(mc)
+    Frame(const int w, const int h, const int mc = 256) : _width(w), _height(h), _max_color(mc)
     {
         _image.resize(w);
         for (auto i = 0; i < w; i++)
@@ -97,9 +97,9 @@ public:
         {
             for (auto j = 0; j < height(); j++)
             {
-                buff << r(i, j) % max_color() << " "
-                     << g(i, j) % max_color() << " "
-                     << b(i, j) % max_color() << "\n";
+                buff << static_cast<int>(r(i, j)) % max_color() << " "
+                     << static_cast<int>(g(i, j)) % max_color() << " "
+                     << static_cast<int>(b(i, j)) % max_color() << "\n";
             }
         }
 

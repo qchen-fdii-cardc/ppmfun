@@ -1,17 +1,29 @@
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include "stb_image_write.h"
 
-#ifdef __cplusplus
-extern "C"
-{
-#endif
-#define MSF_GIF_IMPL
-#include "msf_gif.h"
-#ifdef __cplusplus
-}
-#endif
-
 #include "frame_utils.h"
+
+#include <cstdio>
+#include <cstdlib>
+#include <iomanip>
+#include <sstream>
+#include <string>
+
+namespace
+{
+    std::string quote_path(const std::string &path)
+    {
+        return "\"" + path + "\"";
+    }
+
+    std::string remove_extension(const std::string &path)
+    {
+        const auto dot = path.find_last_of('.');
+        if (dot == std::string::npos)
+            return path;
+        return path.substr(0, dot);
+    }
+}
 
 bool frame_to_png(const Frame &frame, const char *filename)
 {
@@ -36,59 +48,51 @@ bool frames_to_gif(const char *filename, const std::vector<Frame> &frames, int d
 {
     if (frames.empty())
         return false;
-    int width = frames[0].width();
-    int height = frames[0].height();
-
-    MsfGifState gifState = {};
-    if (!msf_gif_begin(&gifState, width, height))
-    {
+    if (delay_cs <= 0)
         return false;
-    }
 
-    msf_gif_bgra_flag = 0;
+    const int width = frames[0].width();
+    const int height = frames[0].height();
+    if (width <= 0 || height <= 0)
+        return false;
 
-    msf_gif_bgra_flag = 1;
+    const std::string gif_filename(filename);
+    const std::string frame_prefix = remove_extension(gif_filename) + "_ffmpeg";
+    std::vector<std::string> temp_files;
+    temp_files.reserve(frames.size());
 
-    std::vector<uint8_t> pixels;
-    for (const auto &frame : frames)
+    for (size_t index = 0; index < frames.size(); ++index)
     {
+        const auto &frame = frames[index];
         if (frame.width() != width || frame.height() != height)
-            continue;
+            return false;
 
-        pixels.clear();
-        pixels.reserve(width * height * 4);
-        for (int j = 0; j < height; j++)
+        std::ostringstream frame_name;
+        frame_name << frame_prefix << "_" << std::setw(4) << std::setfill('0') << index << ".ppm";
+        const auto path = frame_name.str();
+        if (frame.dump(path.c_str()) == static_cast<size_t>(-1))
         {
-            for (int i = 0; i < width; i++)
-            {
-                pixels.push_back(frame.b(i, j));
-                pixels.push_back(frame.g(i, j));
-                pixels.push_back(frame.r(i, j));
-                pixels.push_back(255); // Alpha
-            }
-        }
-        if (!msf_gif_frame(&gifState, pixels.data(), delay_cs, 16, width * 4))
-        {
-            msf_gif_end(&gifState); // clean up
-            msf_gif_bgra_flag = 0;
+            for (const auto &temp_file : temp_files)
+                std::remove(temp_file.c_str());
             return false;
         }
+        temp_files.push_back(path);
     }
 
-    msf_gif_bgra_flag = 0;
-    MsfGifResult result = msf_gif_end(&gifState);
-    bool success = false;
-    if (result.data)
-    {
-        FILE *fp = nullptr;
-        if (fopen_s(&fp, filename, "wb") == 0 && fp)
-        {
-            fwrite(result.data, 1, result.dataSize, fp);
-            fclose(fp);
-            success = true;
-        }
-    }
-    msf_gif_free(result);
+    std::ostringstream fps_stream;
+    fps_stream << std::fixed << std::setprecision(3) << (100.0 / delay_cs);
 
-    return success;
+    std::ostringstream cmd;
+    cmd << "ffmpeg -y -framerate " << fps_stream.str()
+        << " -i " << quote_path(frame_prefix + "_%04d.ppm")
+        << " -vf \"scale=" << width << ":" << height
+        << ":flags=lanczos,split[s0][s1];[s0]palettegen[p];[s1][p]paletteuse\" "
+        << quote_path(gif_filename);
+
+    const int result = std::system(cmd.str().c_str());
+
+    for (const auto &temp_file : temp_files)
+        std::remove(temp_file.c_str());
+
+    return result == 0;
 }

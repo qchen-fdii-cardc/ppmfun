@@ -1,9 +1,8 @@
 #include "frame.h"
 #include "frame_utils.h"
-#include <cstdlib>
 #include <cmath>
-#include <sstream>
 #include <vector>
+#include <algorithm>
 
 int main()
 {
@@ -56,10 +55,8 @@ int main()
 
     auto fn = std::string(__FILE__);
     fn = fn.substr(0, fn.find_last_of('.'));
-    frames_to_gif(fn.append(".gif").c_str(), frames, 10);
-
-    frames[0].dump("sphere_0.ppm");
-    frames[1].dump("sphere_1.ppm");
+    auto gif_fn = fn + ".gif";
+    frames_to_gif(gif_fn.c_str(), frames, 10);
 
     return 0;
 }
