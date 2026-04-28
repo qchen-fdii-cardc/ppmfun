@@ -25,6 +25,17 @@ namespace
     }
 }
 
+/**
+ * Export a single frame to a PNG file
+ * Call stbi_write_png() to write the image data to a PNG file.
+ * The image data is stored in a 1D array of unsigned char,
+ * where each pixel is represented by three consecutive bytes (R, G, B).
+ * The stride (number of bytes in a row) is calculated as
+ * width * 3 since each pixel has 3 bytes.
+ * After writing the PNG file, the allocated memory for the image data is freed.
+ * The function returns true if the PNG file was successfully written,
+ * and false otherwise.
+ */
 bool frame_to_png(const Frame &frame, const char *filename)
 {
     if (frame.width() == 0 || frame.height() == 0)
@@ -44,6 +55,12 @@ bool frame_to_png(const Frame &frame, const char *filename)
     return result != 0;
 }
 
+/**
+ * Export a series of frames to a GIF file
+ * The function first checks if the frames vector is empty or if the delay is non-positive, returning false in those cases.
+ * It then retrieves the width and height of the first frame and checks if they are valid.
+ * If all checks pass, it proceeds to create temporary PPM files for each frame and uses ffmpeg to generate the GIF.
+ */
 bool frames_to_gif(const char *filename, const std::vector<Frame> &frames, int delay_cs)
 {
     if (frames.empty())

@@ -18,7 +18,9 @@ const inline unsigned char clamp(const T &x)
 {
     return static_cast<unsigned char>(x);
 }
-
+/**
+ * The Frame class represents an image frame with a specified width, height, and maximum color value. It provides constructors for creating a frame with given dimensions and for loading a frame from a PPM file. The class includes methods to access and modify pixel colors, retrieve frame dimensions and maximum color value, and export the frame to a PPM file. The pixel data is stored in a 2D vector of Color objects, where each Color object contains the red, green, and blue components of a pixel.
+ */
 class Frame
 {
 public:

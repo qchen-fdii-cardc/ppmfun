@@ -6,10 +6,10 @@
 
 int main()
 {
-    const int width = 480;
-    const int height = 480;
+    const int width = 1000;
+    const int height = 1000;
     const int num_frames = 60;
-    const double radius = 0.5; // Radius of the sphere (from 0.0 to 1.0)
+    const double radius = 0.8; // Radius of the sphere (from 0.0 to 1.0)
 
     std::vector<Frame> frames;
 
@@ -19,7 +19,7 @@ int main()
         double angle = 2.0 * 3.1415926535 * k / num_frames;
         double Lx = std::cos(angle);
         double Ly = std::sin(angle);
-        double Lz = 0.7071;
+        double Lz = -0.1;
 
         for (auto i = 0; i < f.width(); i++)
         {
