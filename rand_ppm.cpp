@@ -1,6 +1,7 @@
 #include "frame.h"
 #include <cstdlib>
 #include <cmath>
+#include "frame_utils.h"
 
 int main()
 {
@@ -18,5 +19,7 @@ int main()
     }
 
     f.dump("rand.ppm");
+
+    frame_to_png(f, "rand.png");
     return 0;
 }

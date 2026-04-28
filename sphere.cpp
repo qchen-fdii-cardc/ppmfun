@@ -1,4 +1,5 @@
 #include "frame.h"
+#include "frame_utils.h"
 #include <cstdlib>
 #include <cmath>
 #include <sstream>
@@ -43,5 +44,8 @@ int main()
     auto fn = std::string(__FILE__);
     fn = fn.substr(0, fn.find_last_of('.')) + ".ppm";
     f.dump(fn.c_str());
+
+    frame_to_png(f, fn.substr(0, fn.find_last_of('.')).append(".png").c_str());
+
     return 0;
 }
